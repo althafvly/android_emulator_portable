@@ -1,8 +1,3 @@
 /opt
-/home/*
-!/home/.android/
-!/home/.android/avd/
-!/home/.android/avd/*.ini
-/home/.android/*
-/home/.android/avd/*.avd/*
+/.android
 commandlinetools-linux-*.zip

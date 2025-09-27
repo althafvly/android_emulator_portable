@@ -8,23 +8,25 @@ set -e
 ARCH="x86_64"
 TARGET="default"
 API_LEVEL="35"
-BUILD_TOOLS="35.0.1"
+BUILD_TOOLS="36.1.0"
 ANDROID_API_LEVEL="android-${API_LEVEL}"
 ANDROID_APIS="${TARGET};${ARCH}"
 EMULATOR_PACKAGE="system-images;${ANDROID_API_LEVEL};${ANDROID_APIS}"
-EMULATOR_NAME="Pixel_6_Pro"
+EMULATOR_NAME="Portable_Pixel_6_Pro"
+DEVICE_NAME="pixel_6_pro"
 PLATFORM_VERSION="platforms;${ANDROID_API_LEVEL}"
 BUILD_TOOL="build-tools;${BUILD_TOOLS}"
 ANDROID_CMD="commandlinetools-linux-13114758_latest.zip"
 ANDROID_SDK_PACKAGES="${EMULATOR_PACKAGE} ${PLATFORM_VERSION} ${BUILD_TOOL} platform-tools emulator"
 ANDROID_SDK_ROOT="$PWD/opt/android"
+AVD_HOME="$PWD/.android/avd"
 
 INSTALL=0
 HEADLESS=0
 
-export HOME="$PWD/home"
 export ANDROID_SDK_ROOT
 export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/tools:$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/${BUILD_TOOLS}"
+export ANDROID_AVD_HOME="$AVD_HOME"
 
 show_help() {
     cat <<EOF
@@ -65,6 +67,9 @@ install_android_sdk() {
     # Accept licenses and install packages
     yes | sdkmanager --licenses
     yes | sdkmanager --verbose --no_https ${ANDROID_SDK_PACKAGES}
+
+    mkdir -p $AVD_HOME
+    echo "no" | avdmanager --verbose create avd --force --name "$EMULATOR_NAME" --device "$DEVICE_NAME" --package "$EMULATOR_PACKAGE"
 
     echo -e "\n Android emulator setup complete!"
 }
