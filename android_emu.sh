@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 #=============================
 # Set default values
@@ -18,8 +20,8 @@ PLATFORM_VERSION="platforms;${ANDROID_API_LEVEL}"
 BUILD_TOOL="build-tools;${BUILD_TOOLS}"
 ANDROID_CMD="commandlinetools-linux-13114758_latest.zip"
 ANDROID_SDK_PACKAGES="${EMULATOR_PACKAGE} ${PLATFORM_VERSION} ${BUILD_TOOL} platform-tools emulator"
-ANDROID_SDK_ROOT="$PWD/opt/android"
-AVD_HOME="$PWD/.android/avd"
+ANDROID_SDK_ROOT="$SCRIPT_DIR/opt/android"
+AVD_HOME="$SCRIPT_DIR/.android/avd"
 
 INSTALL=0
 HEADLESS=0
