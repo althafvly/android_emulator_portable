@@ -58,8 +58,10 @@ install_android_sdk() {
     sudo mkdir -p "$ANDROID_SDK_ROOT"
     sudo chown -R $(whoami):$(whoami) "$ANDROID_SDK_ROOT"
 
-    if [ ! -f "$ANDROID_CMD" ]; then
-        wget -O $ANDROID_CMD https://dl.google.com/android/repository/$ANDROID_CMD
+    if [ ! -d "$ANDROID_SDK_ROOT/cmdline-tools" ]; then
+        if [ ! -f "$ANDROID_CMD" ]; then
+            wget -O $ANDROID_CMD https://dl.google.com/android/repository/$ANDROID_CMD
+        fi
         unzip -d "$ANDROID_SDK_ROOT" $ANDROID_CMD
         mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/tools"
         mv "$ANDROID_SDK_ROOT/cmdline-tools/"{bin,lib,NOTICE.txt,source.properties} \
