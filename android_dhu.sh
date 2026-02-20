@@ -7,7 +7,7 @@ cd "$SCRIPT_DIR"
 #=============================
 # Set default values
 #=============================
-ANDROID_CMD="commandlinetools-linux-13114758_latest.zip"
+ANDROID_CMD="commandlinetools-linux-14742923_latest.zip"
 ANDROID_SDK_PACKAGES="platform-tools extras;google;auto"
 ANDROID_SDK_ROOT="$SCRIPT_DIR/opt/android"
 
