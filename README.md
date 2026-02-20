@@ -1,14 +1,72 @@
-# Android Emulator
+# Android Emulator Portable
 
-This repository provides a Bash script to **install the Android SDK + emulator** and **run an Android Virtual Device (AVD)** with optional headless mode.
+This repository provides scripts to install and run the Android Emulator and Android Auto Desktop Head Unit (DHU) without needing a full Android Studio installation. Everything is kept local to the project directory, so it won't interfere with any global Android SDKs you might already have.
 
-## Features
+## How it works
 
-- Installs all required system dependencies for running the Android emulator
-- Downloads and configures the Android SDK command-line tools
-- Runs emulator normally or in headless mode (`-no-window -gpu off -no-audio`)
+The scripts automate the setup process by downloading the minimum required SDK components directly into the `opt/android/` folder. They also configure the AVD (Android Virtual Device) to live entirely within this project directory.
 
-## Usage
+Here is a breakdown of what the scripts do:
 
-```bash
-./android_emu.sh
+1. **Install dependencies:** Runs `apt` to install system packages required by the Android Emulator locally (like `libxkbcommon`, `xvfb`, etc).
+2. **Download Command Line Tools:** Fetches the Android command-line tools zip from Google and extracts it into `opt/android/`.
+3. **Install SDK packages:** Uses `sdkmanager` to install necessary packages depending on the script:
+   - Emulator (`android_emu.sh`): installs `system-images`, `platforms`, `build-tools`, and `emulator`.
+   - DHU (`android_dhu.sh`): installs `platform-tools` and `extras;google;auto`.
+4. **Create the device:** Uses `avdmanager` to set up a new AVD. The default configuration is a Pixel 6 Pro running API 35. The AVD files are placed in `.android/avd/`.
+5. **Run:** Launches either the emulator or DHU. The emulator can be started normally or in headless mode.
+
+## Directory structure
+
+After running the setup, your directory will look like this:
+
+```text
+android_emu_portable/
+├── android_emu.sh       # script for Android Emulator
+├── android_dhu.sh       # script for Android Auto DHU
+├── README.md
+├── commandlinetools-linux-..._latest.zip
+├── opt/                 
+│   └── android/         # Local SDK root
+│       ├── cmdline-tools/
+│       ├── emulator/
+│       ├── platform-tools/
+│       ├── build-tools/
+│       └── system-images/
+└── .android/
+    └── avd/             # Local AVD storage
+```
+
+## Scripts
+
+### `android_emu.sh`
+
+Starts the Android emulator. 
+
+By default, the script creates a `pixel_6_pro` device targeting API 35 named `Portable_Pixel_6_Pro`.
+
+**Options:**
+- `-i`: Installs the Android SDK, downloads system images, creates the AVD, and installs dependencies.
+- `-n`: Runs the emulator in headless mode (`-no-window -gpu off -no-audio`).
+- `-h`: Show help.
+
+If you just run `./android_emu.sh` without flags, it will simply start the emulator. If the emulator is not found, it runs the install step automatically.
+
+### `android_dhu.sh`
+
+Starts the Android Auto Desktop Head Unit (DHU). See the [official documentation](https://developer.android.com/training/cars/testing/dhu) for more details. 
+
+**Options:**
+- `-i`: Installs the required SDK components (`extras;google;auto`) and dependencies.
+- `-h`: Show help.
+
+Running `./android_dhu.sh` without flags will run `desktop-head-unit --usb`. If it is not found, the script will install it automatically.
+
+## Environment isolation
+
+To keep things portable, the scripts temporarily set these environment variables when they run:
+
+- `ANDROID_SDK_ROOT="$SCRIPT_DIR/opt/android"`
+- `ANDROID_AVD_HOME="$SCRIPT_DIR/.android/avd"`
+
+This guarantees that the scripts will not read from or write to your global `~/.android` or `~/Android/Sdk` folders.
