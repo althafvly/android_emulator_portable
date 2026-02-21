@@ -1,3 +1,4 @@
 /opt
 /.android
 commandlinetools-linux-*.zip
+.env

@@ -5,17 +5,24 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 #=============================
+# Load .env if exists
+#=============================
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    export $(grep -v '^#' "$SCRIPT_DIR/.env" | xargs)
+fi
+
+#=============================
 # Set default values
 #=============================
-ARCH="x86_64"
-TARGET="default"
-API_LEVEL="35"
+ARCH="${ARCH:-x86_64}"
+TARGET="${TARGET:-default}"
+API_LEVEL="${API_LEVEL:-35}"
 BUILD_TOOLS="36.1.0"
 ANDROID_API_LEVEL="android-${API_LEVEL}"
 ANDROID_APIS="${TARGET};${ARCH}"
 EMULATOR_PACKAGE="system-images;${ANDROID_API_LEVEL};${ANDROID_APIS}"
-EMULATOR_NAME="Portable_Pixel_6_Pro"
-DEVICE_NAME="pixel_6_pro"
+EMULATOR_NAME="${EMULATOR_NAME:-Portable_Pixel_6_Pro}"
+DEVICE_NAME="${DEVICE_NAME:-pixel_6_pro}"
 PLATFORM_VERSION="platforms;${ANDROID_API_LEVEL}"
 BUILD_TOOL="build-tools;${BUILD_TOOLS}"
 ANDROID_CMD="commandlinetools-linux-14742923_latest.zip"
@@ -73,7 +80,6 @@ install_android_sdk() {
     yes | sdkmanager --verbose --no_https ${ANDROID_SDK_PACKAGES}
 
     mkdir -p $AVD_HOME
-    echo "no" | avdmanager --verbose create avd --force --name "$EMULATOR_NAME" --device "$DEVICE_NAME" --package "$EMULATOR_PACKAGE"
 
     echo -e "\n Android emulator setup complete!"
 }
@@ -104,6 +110,18 @@ done
 
 if [[ "$INSTALL" -eq 1 ]]; then
     install_android_sdk
+fi
+
+AVD_PATH="${AVD_HOME}/${EMULATOR_NAME}.avd"
+
+if [ -d "$AVD_PATH" ]; then
+    echo "AVD '$EMULATOR_NAME' already exists. Skipping creation."
+else
+    echo "Creating AVD '$EMULATOR_NAME'..."
+    echo "no" | avdmanager --verbose create avd \
+        --name "$EMULATOR_NAME" \
+        --device "$DEVICE_NAME" \
+        --package "$EMULATOR_PACKAGE"
 fi
 
 run_emulator

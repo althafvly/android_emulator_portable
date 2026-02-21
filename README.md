@@ -37,13 +37,24 @@ android_emu_portable/
     └── avd/             # Local AVD storage
 ```
 
+## Configuration
+
+You can override the default emulator configuration by creating a `.env` file in the project root. You can copy the provided `.env_example` as a starting point.
+
+**Supported options:**
+- `ARCH` (default: `x86_64`)
+- `TARGET` (default: `default`)
+- `API_LEVEL` (default: `35`)
+- `EMULATOR_NAME` (default: `Portable_Pixel_6_Pro`)
+- `DEVICE_NAME` (default: `pixel_6_pro`)
+
 ## Scripts
 
 ### `android_emu.sh`
 
 Starts the Android emulator. 
 
-By default, the script creates a `pixel_6_pro` device targeting API 35 named `Portable_Pixel_6_Pro`.
+By default, the script creates a `pixel_6_pro` device targeting API 35 named `Portable_Pixel_6_Pro`. You can override these defaults using a `.env` file (see Configuration above).
 
 **Options:**
 - `-i`: Installs the Android SDK, downloads system images, creates the AVD, and installs dependencies.
