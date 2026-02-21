@@ -122,6 +122,7 @@ else
         --name "$EMULATOR_NAME" \
         --device "$DEVICE_NAME" \
         --package "$EMULATOR_PACKAGE"
+    sed -i 's/^hw\.keyboard *= *no/hw.keyboard = yes/' $AVD_PATH/config.ini
 fi
 
 run_emulator
