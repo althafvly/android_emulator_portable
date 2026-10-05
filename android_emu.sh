@@ -25,7 +25,7 @@ EMULATOR_NAME="${EMULATOR_NAME:-Portable_Pixel_6_Pro}"
 DEVICE_NAME="${DEVICE_NAME:-pixel_6_pro}"
 PLATFORM_VERSION="platforms;${ANDROID_API_LEVEL}"
 BUILD_TOOL="build-tools;${BUILD_TOOLS}"
-ANDROID_CMD="commandlinetools-linux-14742923_latest.zip"
+ANDROID_CMD="commandlinetools-linux-15859902_latest.zip"
 ANDROID_SDK_PACKAGES="${EMULATOR_PACKAGE} ${PLATFORM_VERSION} ${BUILD_TOOL} platform-tools emulator"
 ANDROID_SDK_ROOT="$SCRIPT_DIR/opt/android"
 AVD_HOME="$SCRIPT_DIR/.android/avd"
@@ -34,7 +34,8 @@ INSTALL=0
 HEADLESS=0
 
 export ANDROID_SDK_ROOT
-export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/tools:$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/${BUILD_TOOLS}"
+export ANDROID_HOME="$ANDROID_SDK_ROOT"
+export PATH="$ANDROID_SDK_ROOT/cmdline-tools/tools:$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/${BUILD_TOOLS}:$PATH"
 export ANDROID_AVD_HOME="$AVD_HOME"
 
 show_help() {
@@ -75,9 +76,20 @@ install_android_sdk() {
             "$ANDROID_SDK_ROOT/cmdline-tools/tools/" || true
     fi
 
-    # Accept licenses and install packages
-    yes | sdkmanager --licenses
-    yes | sdkmanager --verbose --no_https ${ANDROID_SDK_PACKAGES}
+    # Skip already installed packages (e.g. locally provided custom system images)
+    MISSING_PACKAGES=""
+    for pkg in ${ANDROID_SDK_PACKAGES}; do
+        if grep -rqs --include=package.xml "localPackage path=\"${pkg}\"" "$ANDROID_SDK_ROOT"; then
+            echo "Package '${pkg}' already installed. Skipping."
+        else
+            MISSING_PACKAGES="${MISSING_PACKAGES} ${pkg//;//}"
+        fi
+    done
+
+    # Install packages (android CLI ignores ANDROID_SDK_ROOT, so pass --sdk)
+    if [ -n "$MISSING_PACKAGES" ]; then
+        yes | android --sdk="$ANDROID_SDK_ROOT" sdk install ${MISSING_PACKAGES}
+    fi
 
     mkdir -p $AVD_HOME
 

@@ -7,7 +7,7 @@ cd "$SCRIPT_DIR"
 #=============================
 # Set default values
 #=============================
-ANDROID_CMD="commandlinetools-linux-14742923_latest.zip"
+ANDROID_CMD="commandlinetools-linux-15859902_latest.zip"
 ANDROID_SDK_PACKAGES="platform-tools extras;google;auto"
 ANDROID_SDK_ROOT="$SCRIPT_DIR/opt/android"
 
@@ -15,7 +15,8 @@ INSTALL=0
 HEADLESS=0
 
 export ANDROID_SDK_ROOT
-export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/tools:$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/extras/google/auto/"
+export ANDROID_HOME="$ANDROID_SDK_ROOT"
+export PATH="$ANDROID_SDK_ROOT/cmdline-tools/tools:$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/extras/google/auto/:$PATH"
 
 show_help() {
     cat <<EOF
@@ -52,9 +53,8 @@ install_android_sdk() {
             "$ANDROID_SDK_ROOT/cmdline-tools/tools/" || true
     fi
 
-    # Accept licenses and install packages
-    yes | sdkmanager --licenses
-    yes | sdkmanager --verbose --no_https ${ANDROID_SDK_PACKAGES}
+    # Install packages (android CLI ignores ANDROID_SDK_ROOT, so pass --sdk)
+    yes | android --sdk="$ANDROID_SDK_ROOT" sdk install ${ANDROID_SDK_PACKAGES//;//}
 
     chmod +x $ANDROID_SDK_ROOT/extras/google/auto/desktop-head-unit
 
