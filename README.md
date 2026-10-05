@@ -10,11 +10,11 @@ Here is a breakdown of what the scripts do:
 
 1. **Install dependencies:** Runs `apt` to install system packages required by the Android Emulator locally (like `libxkbcommon`, `xvfb`, etc).
 2. **Download Command Line Tools:** Fetches the Android command-line tools zip from Google and extracts it into `opt/android/`.
-3. **Install SDK packages:** Uses `sdkmanager` to install necessary packages depending on the script:
+3. **Install SDK packages:** Uses the new Android CLI (`android sdk install`) to install necessary packages depending on the script. Packages already present locally (e.g. a custom system image) are skipped:
    - Emulator (`android_emu.sh`): installs `system-images`, `platforms`, `build-tools`, and `emulator`.
    - DHU (`android_dhu.sh`): installs `platform-tools` and `extras;google;auto`.
 4. **Create the device:** Uses `avdmanager` to set up a new AVD. The default configuration is a Pixel 6 Pro running API 35. The AVD files are placed in `.android/avd/`.
-5. **Run:** Launches either the emulator or DHU. The emulator can be started normally or in headless mode.
+5. **Run:** Launches either the emulator or DHU. The emulator is started with `android emulator start` (runs in the background and waits until booted) or directly in headless mode.
 
 ## Directory structure
 
@@ -58,10 +58,11 @@ By default, the script creates a `pixel_6_pro` device targeting API 35 named `Po
 
 **Options:**
 - `-i`: Installs the Android SDK, downloads system images, creates the AVD, and installs dependencies.
-- `-n`: Runs the emulator in headless mode (`-no-window -gpu off -no-audio`).
+- `-n`: Runs the emulator in headless mode (`-no-window -gpu off -no-audio`) in the foreground.
+- `-s`: Stops the running emulator (`android emulator stop`).
 - `-h`: Show help.
 
-If you just run `./android_emu.sh` without flags, it will simply start the emulator. If the emulator is not found, it runs the install step automatically.
+If you just run `./android_emu.sh` without flags, it starts the emulator in the background and returns once it has booted. If the emulator is not found, it runs the install step automatically.
 
 ### `android_dhu.sh`
 

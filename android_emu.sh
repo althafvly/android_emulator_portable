@@ -32,11 +32,18 @@ AVD_HOME="$SCRIPT_DIR/.android/avd"
 
 INSTALL=0
 HEADLESS=0
+STOP=0
 
 export ANDROID_SDK_ROOT
 export ANDROID_HOME="$ANDROID_SDK_ROOT"
 export PATH="$ANDROID_SDK_ROOT/cmdline-tools/tools:$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/${BUILD_TOOLS}:$PATH"
 export ANDROID_AVD_HOME="$AVD_HOME"
+export ANDROID_USER_HOME="$SCRIPT_DIR/.android"
+
+# New Android CLI ignores ANDROID_SDK_ROOT, so always pass --sdk
+android_cli() {
+    android --sdk="$ANDROID_SDK_ROOT" "$@"
+}
 
 show_help() {
     cat <<EOF
@@ -45,13 +52,15 @@ Usage: $(basename "$0") [OPTIONS]
 Options:
   -i        Install Android SDK, dependencies, and create AVD if missing
   -n        Run emulator in headless mode (no window, no GPU, no audio)
+  -s        Stop the running emulator
   -h        Show this help message
 
 Examples:
   $(basename "$0") -i        Install SDK + create AVD, then run emulator
   $(basename "$0") -n        Run emulator headless
   $(basename "$0") -i -n     Install SDK + create AVD, then run emulator headless
-  $(basename "$0")           Run emulator normally (installs if missing)
+  $(basename "$0") -s        Stop the emulator
+  $(basename "$0")           Start emulator in background, wait until booted (installs if missing)
 EOF
 }
 
@@ -86,9 +95,9 @@ install_android_sdk() {
         fi
     done
 
-    # Install packages (android CLI ignores ANDROID_SDK_ROOT, so pass --sdk)
+    # Install packages
     if [ -n "$MISSING_PACKAGES" ]; then
-        yes | android --sdk="$ANDROID_SDK_ROOT" sdk install ${MISSING_PACKAGES}
+        yes | android_cli sdk install ${MISSING_PACKAGES}
     fi
 
     mkdir -p $AVD_HOME
@@ -97,28 +106,34 @@ install_android_sdk() {
 }
 
 run_emulator() {
-    EMULATOR_ARGS=""
-    if [[ "$HEADLESS" == "1" ]]; then
-        EMULATOR_ARGS="-no-window -gpu off -no-audio"
-    fi
-
     if ! command -v emulator &>/dev/null; then
         echo "Emulator not found. Running install..."
         install_android_sdk
     fi
 
-    emulator -avd "${EMULATOR_NAME}" ${EMULATOR_ARGS}
+    if [[ "$HEADLESS" == "1" ]]; then
+        # android CLI can't pass emulator flags, so launch headless directly
+        emulator -avd "${EMULATOR_NAME}" -no-window -gpu off -no-audio
+    else
+        android_cli emulator start "${EMULATOR_NAME}"
+    fi
 }
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -i) INSTALL=1 ;;
         -n) HEADLESS=1 ;;
+        -s) STOP=1 ;;
         -h|--help) show_help; exit 0 ;;
         *) echo "Unknown option: $1"; show_help; exit 1 ;;
     esac
     shift
 done
+
+if [[ "$STOP" -eq 1 ]]; then
+    android_cli emulator stop "${EMULATOR_NAME}"
+    exit 0
+fi
 
 if [[ "$INSTALL" -eq 1 ]]; then
     install_android_sdk

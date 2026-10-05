@@ -16,6 +16,7 @@ HEADLESS=0
 
 export ANDROID_SDK_ROOT
 export ANDROID_HOME="$ANDROID_SDK_ROOT"
+export ANDROID_USER_HOME="$SCRIPT_DIR/.android"
 export PATH="$ANDROID_SDK_ROOT/cmdline-tools/tools:$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/extras/google/auto/:$PATH"
 
 show_help() {
