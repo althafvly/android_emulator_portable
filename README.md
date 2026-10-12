@@ -62,7 +62,7 @@ By default, the script creates a `pixel_6_pro` device targeting API 35 named `Po
 - `-s`: Stops the running emulator (`android emulator stop`).
 - `-h`: Show help.
 
-If you just run `./android_emu.sh` without flags, it starts the emulator in the background and returns once it has booted. If the emulator is not found, it runs the install step automatically.
+If you just run `./android_emu.sh` without flags, it starts the emulator in the background and returns once it has booted. If the emulator is not found, it runs the install step automatically. The emulator always cold boots (no snapshot is loaded or saved).
 
 ### `android_dhu.sh`
 

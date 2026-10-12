@@ -105,17 +105,29 @@ install_android_sdk() {
     echo -e "\n Android emulator setup complete!"
 }
 
+disable_snapshots() {
+    # Always cold boot and never save a quickboot snapshot on exit
+    sed -i -e 's/^fastboot\.forceColdBoot *=.*/fastboot.forceColdBoot = yes/' \
+        -e 's/^fastboot\.forceFastBoot *=.*/fastboot.forceFastBoot = no/' \
+        "$AVD_PATH/config.ini"
+    grep -q '^fastboot\.forceColdBoot' "$AVD_PATH/config.ini" ||
+        echo "fastboot.forceColdBoot = yes" >>"$AVD_PATH/config.ini"
+    echo "saveOnExit = false" >"$AVD_PATH/quickbootChoice.ini"
+}
+
 run_emulator() {
     if ! command -v emulator &>/dev/null; then
         echo "Emulator not found. Running install..."
         install_android_sdk
     fi
 
+    disable_snapshots
+
     if [[ "$HEADLESS" == "1" ]]; then
         # android CLI can't pass emulator flags, so launch headless directly
-        emulator -avd "${EMULATOR_NAME}" -no-window -gpu off -no-audio
+        emulator -avd "${EMULATOR_NAME}" -no-window -gpu off -no-audio -no-snapshot
     else
-        android_cli emulator start "${EMULATOR_NAME}"
+        android_cli emulator start --cold "${EMULATOR_NAME}"
     fi
 }
 
